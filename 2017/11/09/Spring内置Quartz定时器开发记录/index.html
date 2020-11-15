@@ -1,0 +1,958 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+  <meta name="google-site-verification" content="GCrTQGup_czjI8b2g4FKzvAoTFPU2MM1IH2a_j5D-R0">
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css">
+
+
+  <meta name="keywords" content="Spring,Quartz,Cron,FixedDelay,FixedRate,">
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0">
+
+
+
+
+
+
+<meta name="description" content="spring内置的quartz定时器使用记录，主要记录实现使用配置，三种部署计划任务方式和定时器cron表达式配置 两种方法实现使用配置方法一：基于xml配置的方式实现1.编写普通的DOJO实体bean1234567891011121314151617package com.bus.test.task;import org.slf4j.Logger;import org.slf4j.LoggerF">
+<meta name="keywords" content="Spring,Quartz,Cron,FixedDelay,FixedRate">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Spring内置Quartz定时器开发记录">
+<meta property="og:url" content="https://shuanfo.com/2017/11/09/Spring内置Quartz定时器开发记录/index.html">
+<meta property="og:site_name" content="SmaChen的博客">
+<meta property="og:description" content="spring内置的quartz定时器使用记录，主要记录实现使用配置，三种部署计划任务方式和定时器cron表达式配置 两种方法实现使用配置方法一：基于xml配置的方式实现1.编写普通的DOJO实体bean1234567891011121314151617package com.bus.test.task;import org.slf4j.Logger;import org.slf4j.LoggerF">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2020-11-15T05:32:32.332Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Spring内置Quartz定时器开发记录">
+<meta name="twitter:description" content="spring内置的quartz定时器使用记录，主要记录实现使用配置，三种部署计划任务方式和定时器cron表达式配置 两种方法实现使用配置方法一：基于xml配置的方式实现1.编写普通的DOJO实体bean1234567891011121314151617package com.bus.test.task;import org.slf4j.Logger;import org.slf4j.LoggerF">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'A2UR5JKG1B',
+      apiKey: '2e0ad21b79be7a2ccf2be09f02a0b163',
+      indexName: 'smachen',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"输入搜索关键字","hits_empty":"没有找到与 ${query} 相关的文章","hits_stats":"${hits} 篇相关文章，共耗时 ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://shuanfo.com/2017/11/09/Spring内置Quartz定时器开发记录/">
+
+
+
+
+
+  <title> Spring内置Quartz定时器开发记录 | SmaChen的博客 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?55d20351ba6d0b6fa2570f5b5e15d573";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">SmaChen的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+    
+      <p class="site-subtitle">朝花夕拾，捡的尽是枯萎……</p>
+    
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-desktop"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br>
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+  <link itemprop="mainEntityOfPage" href="https://shuanfo.com/2017/11/09/Spring内置Quartz定时器开发记录/">
+
+  <span style="display:none" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <meta itemprop="name" content="SmaChen">
+    <meta itemprop="description" content>
+    <meta itemprop="image" content="https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTLSly0zqweJ9UZyianQ6UXKhCdBe2KHxBfM68wCdsMNwVRgFtAur4pZ6l4ic75ljfKe2GjYVORxN7kQ/0">
+  </span>
+
+  <span style="display:none" itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+    <meta itemprop="name" content="SmaChen的博客">
+    <span style="display:none" itemprop="logo" itemscope itemtype="http://schema.org/ImageObject">
+      <img style="display:none;" itemprop="url image" alt="SmaChen的博客" src>
+    </span>
+  </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Spring内置Quartz定时器开发记录
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T14:14:38+08:00">
+                2017-11-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/" itemprop="url" rel="index">
+                    <span itemprop="name">技术</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/Spring/" itemprop="url" rel="index">
+                    <span itemprop="name">Spring</span>
+                  </a>
+                </span>
+
+                
+                
+                  ， 
+                
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术/Spring/Quartz/" itemprop="url" rel="index">
+                    <span itemprop="name">Quartz</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+
+          
+          
+             <span id="/2017/11/09/Spring内置Quartz定时器开发记录/" class="leancloud_visitors" data-flag-title="Spring内置Quartz定时器开发记录">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>spring内置的quartz定时器使用记录，主要记录实现使用配置，三种部署计划任务方式和定时器cron表达式配置</p>
+<p></p><h3 id="h31">两种方法实现使用配置</h3><h4 id="h3h41">方法一：基于xml配置的方式实现</h4><h5 id="h3h41h51">1.编写普通的DOJO实体bean</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.bus.test.task;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.bus.test.controller.WxInterface;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccessTokenTask</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Logger logger = LoggerFactory.getLogger(AccessTokenTask<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">scheduled</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		String accessToken = WxInterface.getAccessToken();</span><br><span class="line">		WxInterface.accessToken = accessToken;</span><br><span class="line">		logger.info(<span class="string">"定时器刷新AccessToken:&#123;&#125;"</span>,accessToken);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><a id="more"></a><h5 id="h3h41h52">2.配置xml配置文件</h5>声明task命名空间<br>xmlns:task=”<a href="http://www.springframework.org/schema/task&quot;" target="_blank" rel="noopener">http://www.springframework.org/schema/task&quot;</a><br>声明schema约束task名称空间的标签规范<br><a href="http://www.springframework.org/schema/task" target="_blank" rel="noopener">http://www.springframework.org/schema/task</a> <a href="http://www.springframework.org/schema/task/spring-task-3.2.xsd" target="_blank" rel="noopener">http://www.springframework.org/schema/task/spring-task-3.2.xsd</a><br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">"http://www.springframework.org/schema/beans"</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xmlns:xsi</span>=<span class="string">"http://www.w3.org/2001/XMLSchema-instance"</span> </span></span><br><span class="line"><span class="tag">	<span class="attr">xmlns:p</span>=<span class="string">"http://www.springframework.org/schema/p"</span></span></span><br><span class="line"><span class="tag">	<span class="attr">......</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xmlns:task</span>=<span class="string">"http://www.springframework.org/schema/task"</span> </span></span><br><span class="line"><span class="tag">	<span class="attr">xsi:schemaLocation</span>=<span class="string">"</span></span></span><br><span class="line"><span class="tag"><span class="string">	http://www.springframework.org/schema/beans </span></span></span><br><span class="line"><span class="tag"><span class="string">	http://www.springframework.org/schema/beans/spring-beans-3.2.xsd</span></span></span><br><span class="line"><span class="tag"><span class="string">	......</span></span></span><br><span class="line"><span class="tag"><span class="string">	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd"</span>  </span></span><br><span class="line"><span class="tag">	<span class="attr">default-autowire</span>=<span class="string">"byName"</span> <span class="attr">default-lazy-init</span>=<span class="string">"false"</span>&gt;</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment">&lt;!-- 将内注入到Spring容器 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">bean</span> <span class="attr">id</span>=<span class="string">"accessTokenTask"</span> <span class="attr">class</span>=<span class="string">"com.bus.test.task.AccessTokenTask"</span>&gt;</span><span class="tag">&lt;/<span class="name">bean</span>&gt;</span>  </span><br><span class="line">    <span class="comment">&lt;!-- 在applicationContext.xml中进行配置，使用定时器</span></span><br><span class="line"><span class="comment">        ref : pojo类的名称</span></span><br><span class="line"><span class="comment">        method : 调用的方式名称</span></span><br><span class="line"><span class="comment">        cron : cronExpression表达式</span></span><br><span class="line"><span class="comment">        cron="0/5 * * * * ?"  //表示五秒钟执行一次,详解见下面的 定时器cron表达式配置</span></span><br><span class="line"><span class="comment">     --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">task:scheduled-tasks</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">task:scheduled</span> <span class="attr">ref</span>=<span class="string">"accessTokenTask"</span> <span class="attr">method</span>=<span class="string">"scheduled"</span> <span class="attr">cron</span>=<span class="string">"0 0 0 ? * SUN"</span>/&gt;</span></span><br><span class="line">        <span class="comment">&lt;!-- 配置多个定时器 --&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">task:scheduled</span> <span class="attr">ref</span>=<span class="string">"......"</span> <span class="attr">method</span>=<span class="string">"..."</span> <span class="attr">cron</span>=<span class="string">"0/5 * * * * ?"</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">task:scheduled-tasks</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure><h4 id="h3h42">方法二：基于注解@Scheduled实现</h4><h5 id="h3h42h51">1.配置xml配置文件</h5>声明task命名空间<br>xmlns:task=”<a href="http://www.springframework.org/schema/task&quot;" target="_blank" rel="noopener">http://www.springframework.org/schema/task&quot;</a><br>声明schema约束task名称空间的标签规范<br><a href="http://www.springframework.org/schema/task" target="_blank" rel="noopener">http://www.springframework.org/schema/task</a> <a href="http://www.springframework.org/schema/task/spring-task-3.2.xsd" target="_blank" rel="noopener">http://www.springframework.org/schema/task/spring-task-3.2.xsd</a><br><figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">beans</span> <span class="attr">xmlns</span>=<span class="string">"http://www.springframework.org/schema/beans"</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xmlns:xsi</span>=<span class="string">"http://www.w3.org/2001/XMLSchema-instance"</span> </span></span><br><span class="line"><span class="tag">	<span class="attr">......</span></span></span><br><span class="line"><span class="tag">	<span class="attr">xmlns:task</span>=<span class="string">"http://www.springframework.org/schema/task"</span> </span></span><br><span class="line"><span class="tag">	<span class="attr">xsi:schemaLocation</span>=<span class="string">"</span></span></span><br><span class="line"><span class="tag"><span class="string">	......</span></span></span><br><span class="line"><span class="tag"><span class="string">	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd"</span>  </span></span><br><span class="line"><span class="tag">	<span class="attr">default-autowire</span>=<span class="string">"byName"</span> <span class="attr">default-lazy-init</span>=<span class="string">"false"</span>&gt;</span></span><br><span class="line">	</span><br><span class="line">    <span class="comment">&lt;!-- 开启任务注解驱动支持 --&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">task:annotation-driven</span>/&gt;</span></span><br><span class="line">    </span><br><span class="line"><span class="tag">&lt;/<span class="name">beans</span>&gt;</span></span><br></pre></td></tr></table></figure><h5 id="h3h42h52">2.编写基于注解的类和基于注解的方法</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.bus.test.task;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.slf4j.Logger;</span><br><span class="line"><span class="keyword">import</span> org.slf4j.LoggerFactory;</span><br><span class="line"><span class="keyword">import</span> org.springframework.scheduling.annotation.Scheduled;</span><br><span class="line"><span class="keyword">import</span> org.springframework.stereotype.Component;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.bus.test.controller.WxInterface;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 此出需要注意，AccessTokenTask类一定要记得扫描，注入到Spring容器定时器才会生效</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Component</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AccessTokenTask</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> Logger logger = LoggerFactory.getLogger(AccessTokenTask<span class="class">.<span class="keyword">class</span>)</span>;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * cron 执行任务方式 详见下面内容</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Scheduled</span>(cron=<span class="string">"0 0 0 ? * SUN"</span>) <span class="comment">//每个星期天的0点0分0秒 0 0 0 ? * SUN，MON，TUE，WED，THU，FRI，SAT</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">scheduled</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">		String accessToken = WxInterface.getAccessToken();</span><br><span class="line">		WxInterface.accessToken = accessToken;</span><br><span class="line">		logger.info(<span class="string">"定时器刷新AccessToken:&#123;&#125;"</span>,accessToken);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p></p>
+<p></p><h3 id="h32">fixedRate、fixedDelay、cron部署计划任务方式</h3>fixedRate=1000 <em> 60  // 每隔多少毫秒执行一次任务<br><blockquote><p>long org.springframework.scheduling.annotation.Scheduled.fixedDelay()<br>Execute the annotated method with a fixed period between the end of the last invocation and the start of the next.<br>Returns:<br>the delay in milliseconds</p>
+</blockquote><br>fixedDelay=1000 </em> 60 // 执行一次任务完毕之后，延迟多少毫秒再执行该任务。<br><blockquote><p>long org.springframework.scheduling.annotation.Scheduled.fixedDelay()<br>Execute the annotated method with a fixed period between the end of the last invocation and the start of the next.<br>Returns:<br>the delay in milliseconds</p>
+</blockquote><br>cron=0  0  0  ?  *  SUN   // 表达式配置了该任务在什么时候执行<br><blockquote><p>String org.springframework.scheduling.annotation.Scheduled.cron()<br>A cron-like expression, extending the usual UN<em>X definition to include triggers on the second as well as minute, hour, day of month, month and day of week. e.g. “0 </em> <em> </em> * MON-FRI” means once per minute on weekdays (at the top of the minute - the 0th second).<br>Returns:<br>an expression that can be parsed to a cron schedule</p>
+</blockquote><p></p>
+<p></p><h3 id="h33">定时器cron表达式配置</h3>Cron表达式有6-7位以空格隔开的字符串表达式，分别对应<br>“秒 分 时 天/月 月 天/星期”<br>“秒 分 时 天/月 月 天/星期 年”<br>秒         0-59<br>分         0-59<br>小时         0-23<br>日期         1-31<br>月份         1-12 或者 JAN-DEC<br>星期         1-7 或者 SUN-SAT<br>年      [可选]1970-2099<p></p>
+<p>【* / # ? L - ,】等特殊值：<br>1、MON 一个星期中的周几：<br> SUN，MON，TUE，WED，THU，FRI，SAT 周天-周五<br> “0 0 12 ? &#42; WED” = 每星期三中午12点执行<br> “0 10,44 14 ? 3 SAT” = 每年三月的星期六的下午2:10和2:44执行 </p>
+<p>2、* 字符代表所有可能的值：<br> 月中表示每个月，年中表示每年，星期中表示每天<br> “0 0 &#42; &#42; &#42; &#42;” = 每天每小时执行<br> “0 0 12 &#42; &#42; ?” = 每天中午12点执行 </p>
+<p>3、/ 字符用来指定数值的增量，起始时间开始触发，然后每隔固定时间执行一次:<br> “3/10”表示从第3分钟开始，每10分钟执行（它和“3，13，23，33，43”的含义一样）<br> “/10 &#42; &#42; &#42; &#42; &#42;” = 每天每10秒钟执行<br> “0 0/5 14 &#42; &#42; ?” = 每天下午2点到下午2:55期间的每5分钟执行<br> “0 3/10 14 &#42; &#42; ?” = 每天下午2点的3，13，23，33，43,53执行  </p>
+<p>4、? 字符表示不指定值，仅被用于月和星期两个子表达式:<br> 月和星期指定值以后，为了避免冲突，需要将另一个子表达式的值设为?<br> “0 0 0 25 12 ?” = 12月25日（圣诞节）午夜执行<br> “0 15 10 15 &#42; ?” = 每月15日上午10:15执行 </p>
+<p>5、L 字符表示最后，仅被用于月和星期：<br> 6L表示倒数第6天，FRIL表示这个月的最一个星期五，在使用“L”参数时，不要指定列表或范围<br> “0 15 10 L &#42; ?” = 每月最后一日的上午10:15执行<br> “0 15 10 ? &#42; 6L” = 每月的最后一个星期五上午10:15执行<br> “0 15 10 ? &#42; 6L 2002-2005” = 2002年至2005年的每月的最后一个星期五上午10:15执行 </p>
+<p>6、- 字符表示范围:<br> 0-5表示从5分到20分钟每分钟执行一次<br> “0 0 8-10 &#42; &#42; &#42;” = 每天的8，9，10点执行<br> “0 0 9-17 &#42; &#42; MON-FRI” = 周一到周五早9点-晚5点每小时执行<br> “0 0-5 14 &#42; &#42; ?” = 每天下午2点到下午2:05期间的每分钟执行 </p>
+<p>7、, 字符表示枚举值：<br> 枚举值的时间执行任务<br> “0 0/5 14,18 &#42; &#42; ?” = 在每天下午2点到2:55期间和下午6点到6:55期间的每5分钟执行<br> “0 10,44 14 ? 3 WED” = 每年三月的星期三的下午2:10和2:44执行 </p>
+<p>8、# 表示确定每个月第几个星期几，只能出现在 天/月 的位置。<br> 4#2，表示某月的第二个星期三<br> “0 15 10 ? &#42; 6#3” = 每月的第三个星期五上午10:15执行</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Spring/" rel="tag"># Spring</a>
+          
+            <a href="/tags/Quartz/" rel="tag"># Quartz</a>
+          
+            <a href="/tags/Cron/" rel="tag"># Cron</a>
+          
+            <a href="/tags/FixedDelay/" rel="tag"># FixedDelay</a>
+          
+            <a href="/tags/FixedRate/" rel="tag"># FixedRate</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/07/Logback-access之http请求查看日志/" rel="next" title="Logback-access之http请求查看日志">
+                <i class="fa fa-chevron-left"></i> Logback-access之http请求查看日志
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/14/MySQL条件关键字-EXISTS-和IN的区别/" rel="prev" title="MySQL条件关键字 EXISTS 和IN的区别">
+                MySQL条件关键字 EXISTS 和IN的区别 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image" src="https://wx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTLSly0zqweJ9UZyianQ6UXKhCdBe2KHxBfM68wCdsMNwVRgFtAur4pZ6l4ic75ljfKe2GjYVORxN7kQ/0" alt="SmaChen">
+          <p class="site-author-name" itemprop="name">SmaChen</p>
+          <p class="site-description motion-element" itemprop="description">任何一个傻瓜都会写能够让机器理解的代码，只有好的程序员才能写出人类可以理解的代码。——Martin Fowler</p>
+        </div>
+        <nav class="site-state motion-element">
+        
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/smachen" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="smachen@126.com" target="_blank" title="E-Mail [ smachen@126.com ]">
+                  
+                    <i class="fa fa-fw fa-envelope-square"></i>
+                  
+                  E-Mail [ smachen@126.com ]
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#h31"><span class="nav-number">1.</span> <span class="nav-text">两种方法实现使用配置</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#h3h41"><span class="nav-number">1.1.</span> <span class="nav-text">方法一：基于xml配置的方式实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#h3h41h51"><span class="nav-number">1.1.1.</span> <span class="nav-text">1.编写普通的DOJO实体bean</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#h3h41h52"><span class="nav-number">1.1.2.</span> <span class="nav-text">2.配置xml配置文件</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#h3h42"><span class="nav-number">1.2.</span> <span class="nav-text">方法二：基于注解@Scheduled实现</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#h3h42h51"><span class="nav-number">1.2.1.</span> <span class="nav-text">1.配置xml配置文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#h3h42h52"><span class="nav-number">1.2.2.</span> <span class="nav-text">2.编写基于注解的类和基于注解的方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#h32"><span class="nav-number">2.</span> <span class="nav-text">fixedRate、fixedDelay、cron部署计划任务方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#h33"><span class="nav-number">3.</span> <span class="nav-text">定时器cron表达式配置</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">
+  
+  &copy;  2016search - 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">SmaChen</span>
+  &nbsp;
+  <span id="busuanzi_container_site_pv"><i class="fa fa-area-chart"></i>本站总访问量<span id="busuanzi_value_site_pv"></span>次</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+<div class="powered-by">
+  Hosted by <a href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+</div>
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("BijEX2kpwHiKdHF4AvBGvW9V-gzGzoHsz", "LTWWs1qs6jO3jV884NwpoHIh");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.0"></script>
+
+
+  
+  <!-- color颜色：默认是（0，0，0），格式是（R,G,B）opacity 透明度：（0-1），默认0.5 count线段的数量：默认2， zIndexZ轴：默认-1 -->
+  <script type="text/javascript" count="180" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js">
+  </script>
+  
+</body>
+</html>
